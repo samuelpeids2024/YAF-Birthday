@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<meta name="theme-color" content="#ffffff">
+<title>年度生日日曆</title>
+<style>
+  :root{
+    --bg:#f4f5f7; --card:#fff; --txt:#1c1c1e; --sub:#8a8f99;
+    --line:#ececee; --accent:#ff6b81; --accent-soft:#ffeef1;
+    --today:#2f6bff;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg); color:var(--txt);
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+    font-size:15px; line-height:1.45;
+    padding-bottom:calc(28px + env(safe-area-inset-bottom));
+  }
+  .wrap{max-width:640px;margin:0 auto;padding:0 12px}
+
+  /* ---------- 頂部 ---------- */
+  header{
+    position:sticky; top:0; z-index:50;
+    background:rgba(244,245,247,.92);
+    backdrop-filter:saturate(180%) blur(12px);
+    -webkit-backdrop-filter:saturate(180%) blur(12px);
+    padding-top:calc(8px + env(safe-area-inset-top));
+    padding-bottom:8px; border-bottom:1px solid var(--line);
+  }
+  .title{display:flex;align-items:baseline;gap:8px;padding:2px 12px 8px}
+  .title h1{font-size:19px;margin:0;letter-spacing:.5px}
+  .title span{font-size:12px;color:var(--sub)}
+  .search{position:relative;padding:0 12px}
+  .search input{
+    width:100%;border:none;outline:none;background:#e8eaee;
+    border-radius:12px;padding:9px 34px 9px 32px;font-size:15px;color:var(--txt);
+  }
+  .search .ico{position:absolute;left:22px;top:9px;color:var(--sub);font-size:14px}
+  .search .clr{position:absolute;right:18px;top:6px;color:var(--sub);font-size:18px;display:none;
+    width:26px;height:26px;line-height:26px;text-align:center}
+  .chips{display:flex;gap:6px;overflow-x:auto;padding:9px 12px 2px;scrollbar-width:none}
+  .chips::-webkit-scrollbar{display:none}
+  .chip{
+    flex:0 0 auto;border:none;background:#e8eaee;color:#4a4f59;
+    border-radius:999px;padding:5px 12px;font-size:13px;line-height:1.2;
+  }
+  .chip.on{background:var(--accent);color:#fff;font-weight:600}
+  .chip i{font-style:normal;font-size:10px;opacity:.75;margin-left:3px}
+  .hint{padding:6px 12px 0;font-size:11.5px;color:var(--sub)}
+
+  /* ---------- 即將到來 ---------- */
+  .up{background:var(--card);border-radius:16px;margin:12px 0 4px;padding:12px 14px;
+      box-shadow:0 1px 2px rgba(0,0,0,.04)}
+  .up h2{margin:0 0 8px;font-size:14px;display:flex;align-items:center;gap:6px}
+  .up .row{display:flex;align-items:center;gap:10px;padding:7px 0;border-top:1px solid var(--line)}
+  .up .row:first-of-type{border-top:none}
+  .av{flex:0 0 34px;width:34px;height:34px;border-radius:50%;color:#fff;
+      display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600}
+  .who{flex:1;min-width:0}
+  .who b{font-weight:600;font-size:15px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .who small{color:var(--sub);font-size:12px}
+  .cd{flex:0 0 auto;font-size:12px;color:var(--accent);font-weight:600;text-align:right}
+  .cd.today{color:var(--today)}
+
+  /* ---------- 月份卡 ---------- */
+  .month{background:var(--card);border-radius:16px;margin:12px 0;padding:12px 10px 6px;
+         box-shadow:0 1px 2px rgba(0,0,0,.04);scroll-margin-top:118px}
+  .mhead{display:flex;align-items:center;gap:8px;padding:0 4px 8px}
+  .mhead .m{font-size:17px;font-weight:700}
+  .mhead .m em{font-style:normal;font-size:11px;color:var(--sub);font-weight:500;margin-left:4px}
+  .mhead .c{margin-left:auto;font-size:11.5px;color:var(--sub);background:#f2f3f5;
+            border-radius:999px;padding:3px 9px}
+  .wk{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:3px}
+  .wk div{text-align:center;font-size:11px;color:var(--sub);padding:2px 0}
+  .wk div:first-child,.wk div:last-child{color:#d0788a}
+  .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+  .cell{
+    position:relative;min-height:44px;border-radius:8px;padding:3px 2px 2px;
+    display:flex;flex-direction:column;gap:1px;background:transparent;
+  }
+  .cell.out{visibility:hidden}
+  .cell .dn{font-size:11px;color:#5b6069;padding-left:3px;line-height:1.2}
+  .cell.we .dn{color:#c76b7d}
+  .cell.has{background:var(--accent-soft)}
+  .cell.has .dn{color:var(--accent);font-weight:700}
+  .cell.today{box-shadow:inset 0 0 0 1.5px var(--today)}
+  .cell.today .dn{color:var(--today)}
+  .cell .nm{
+    font-size:8.5px;line-height:1.15;color:#8e2c3c;padding:0 2px;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .cell .nm.dim{color:#9aa0aa}
+  .mlist{margin-top:8px;border-top:1px dashed var(--line);padding-top:4px}
+  .mlist .li{display:flex;align-items:center;gap:9px;padding:6px 4px}
+  .mlist .li+.li{border-top:1px solid #f4f4f6}
+  .mlist .av{width:28px;height:28px;flex-basis:28px;font-size:12px}
+  .mlist .d{font-size:12px;color:var(--sub);flex:0 0 auto;min-width:30px;text-align:right}
+  .mlist .n{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .mlist .li.hit{background:var(--accent-soft);border-radius:8px}
+  .empty{display:none;text-align:center;color:var(--sub);font-size:13px;padding:30px 0}
+  .tools{display:flex;gap:8px;margin:14px 0 6px}
+  .tools button{flex:1;border:none;background:#e8eaee;color:#3a3f49;border-radius:12px;
+                padding:10px;font-size:13.5px}
+  footer{text-align:center;color:var(--sub);font-size:11.5px;padding:6px 0 18px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="title"><h1>🎂 年度生日日曆</h1><span id="stat"></span></div>
+  <div class="search">
+    <span class="ico">🔍</span>
+    <input id="q" type="search" placeholder="搜尋名字…" autocomplete="off">
+    <span class="clr" id="clr">×</span>
+  </div>
+  <div class="chips" id="chips"></div>
+  <div class="hint" id="hint">點日期可定位到下方名單 · 月份標籤可快速跳轉</div>
+</header>
+
+<div class="wrap">
+  <section class="up" id="up">
+    <h2>🎉 即將到來的生日</h2>
+    <div id="upRows"></div>
+  </section>
+
+  <div id="cal"></div>
+  <div class="empty" id="empty">找不到符合的壽星</div>
+
+  <div class="tools">
+    <button id="ics">📅 匯出行事曆 (.ics)</button>
+    <button id="top">↑ 回到頂部</button>
+  </div>
+  <footer id="foot"></footer>
+</div>
+
+<script>
+/* ---------- 資料 ---------- */
+const DATA = [
+["Abi",2,4],["Shirley 張",2,10],["Lulu",2,24],["Harold",2,26],
+["Stephen LI",3,11],["Ada",3,12],["Timothy 昊雲",3,20],["Ruby",3,23],["Gordon",3,27],
+["Jane",4,10],
+["Mike",5,1],["Michael Lee",5,8],["Amy",5,14],["William",5,21],["Teresa",5,24],["Evan",5,27],["Manyi",5,31],
+["Hilda",6,1],["Tommy",6,7],["Zadok",6,9],["Jessie",6,16],["Solomon",6,16],["Camellia",6,18],["Shirley Hou",6,19],["Easton/YY",6,25],
+["Annie Yuan",7,28],
+["依夏",8,30],["Nathan",8,30],
+["Carol",9,1],["晓玲",9,2],["Sophia DOU",9,7],["Gemma",9,10],["Eric Cui",9,12],["Zoe",9,13],["旻卉",9,15],
+["小多",10,2],["Cindy Wu",10,2],["Michael 鄔",10,4],["Samie Yu",10,22],["Isabelle",10,31],["Scarlett",10,31],
+["慈恩",11,4],["洋洋",11,5],["项兒",11,6],["Daniel Yuan",11,19],["Sophie",11,19],
+["尤牧师",12,16],["Ken",12,16],["Samuel",12,24],["南竹",12,28]
+].map(x=>({name:x[0].trim(), m:x[1], d:x[2]}));
+
+const MN=["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"];
+const WK=["日","一","二","三","四","五","六"];
+const PALETTE=["#ff6b81","#f2994a","#7c8cff","#2fbf9f","#c475ff","#4aa8ff","#ff8f5a","#39b6a8","#e068a8","#8b93ff"];
+const color = s => PALETTE[[...s].reduce((a,c)=>a+c.charCodeAt(0),0)%PALETTE.length];
+const initial = s => (s.match(/[A-Za-z一-龥]/)||[s[0]])[0].toUpperCase();
+
+const now=new Date(), Y=now.getFullYear(), TODAY=new Date(Y,now.getMonth(),now.getDate());
+const dayCount = m => new Date(Y,m,0).getDate();
+
+/* ---------- 即將到來 ---------- */
+function upcoming(list){
+  const arr=list.map(p=>{
+    let dt=new Date(Y,p.m-1,p.d);
+    if(dt<TODAY) dt=new Date(Y+1,p.m-1,p.d);
+    return {...p, dt, days:Math.round((dt-TODAY)/864e5)};
+  }).sort((a,b)=>a.days-b.days);
+  return arr.slice(0,5);
+}
+function renderUp(list){
+  const rows=upcoming(list).map(p=>{
+    const t = p.days===0 ? "就是今天 🎈" : p.days===1 ? "明天" : p.days+" 天後";
+    return `<div class="row">
+      <div class="av" style="background:${color(p.name)}">${initial(p.name)}</div>
+      <div class="who"><b>${p.name}</b><small>${p.m}月${p.d}日 ${WK[new Date(Y,p.m-1,p.d).getDay()]}</small></div>
+      <div class="cd ${p.days===0?'today':''}">${t}</div>
+    </div>`;
+  }).join("");
+  document.getElementById("upRows").innerHTML = rows || `<div class="row"><div class="who"><small>沒有符合的壽星</small></div></div>`;
+}
+
+/* ---------- 日曆 ---------- */
+let FILTER = "";
+function match(p){ return !FILTER || p.name.toLowerCase().includes(FILTER); }
+
+function render(){
+  const list = DATA.filter(match);
+  const byMonth = Array.from({length:12},()=>[]);
+  list.forEach(p=>byMonth[p.m-1].push(p));
+  byMonth.forEach(a=>a.sort((x,y)=>x.d-y.d));
+
+  document.getElementById("stat").textContent = FILTER ? `找到 ${list.length} 位` : `共 ${DATA.length} 位壽星`;
+  document.getElementById("empty").style.display = list.length? "none":"block";
+  renderUp(list);
+
+  document.getElementById("cal").innerHTML = MN.map((label,mi)=>{
+    if(!byMonth[mi].length) return "";
+    const m=mi+1, first=new Date(Y,mi,1).getDay(), total=dayCount(m);
+    let cells="";
+    for(let i=0;i<first;i++) cells+=`<div class="cell out"></div>`;
+    for(let d=1;d<=total;d++){
+      const born=byMonth[mi].filter(p=>p.d===d);
+      const we = (new Date(Y,mi,d).getDay()===0||new Date(Y,mi,d).getDay()===6);
+      const isToday = (m===now.getMonth()+1 && d===now.getDate());
+      const cls=["cell", born.length?"has":"", we?"we":"", isToday?"today":""].join(" ");
+      const names = born.map(p=>`<div class="nm">${p.name}</div>`).join("");
+      cells+=`<div class="${cls}" data-m="${m}" data-d="${d}"><span class="dn">${d}</span>${names}</div>`;
+    }
+    const li = byMonth[mi].map(p=>`<div class="li" data-m="${p.m}" data-d="${p.d}">
+        <div class="av" style="background:${color(p.name)}">${initial(p.name)}</div>
+        <div class="n">${p.name}</div><div class="d">${p.d}日</div></div>`).join("");
+    return `<section class="month" id="m${m}">
+      <div class="mhead"><span class="m">${label}<em>${m} 月</em></span><span class="c">${byMonth[mi].length} 位</span></div>
+      <div class="wk">${WK.map(w=>`<div>${w}</div>`).join("")}</div>
+      <div class="grid">${cells}</div>
+      <div class="mlist">${li}</div>
+    </section>`;
+  }).join("");
+
+  // 月份快捷標籤
+  document.getElementById("chips").innerHTML = MN.map((label,mi)=>{
+    const n=byMonth[mi].length;
+    return `<button class="chip" data-m="${mi+1}">${label}${n?`<i>${n}</i>`:""}</button>`;
+  }).join("");
+}
+
+/* ---------- 互動 ---------- */
+document.addEventListener("click", e=>{
+  const chip=e.target.closest(".chip");
+  if(chip){
+    const t=document.getElementById("m"+chip.dataset.m);
+    if(t) window.scrollTo({top:t.offsetTop-110, behavior:"smooth"});
+    return;
+  }
+  const cell=e.target.closest(".grid .cell");
+  if(cell){
+    const li=document.querySelector(`.mlist .li[data-m="${cell.dataset.m}"][data-d="${cell.dataset.d}"]`);
+    if(li){
+      document.querySelectorAll(".mlist .li.hit").forEach(x=>x.classList.remove("hit"));
+      li.classList.add("hit");
+      li.scrollIntoView({block:"center", behavior:"smooth"});
+      li.animate([{background:"#ffd9e0"},{background:"#ffeef1"}],{duration:900});
+    }
+    return;
+  }
+});
+
+const q=document.getElementById("q"), clr=document.getElementById("clr");
+q.addEventListener("input",()=>{
+  FILTER=q.value.trim().toLowerCase();
+  clr.style.display=FILTER?"block":"none";
+  render();
+});
+clr.addEventListener("click",()=>{q.value="";FILTER="";clr.style.display="none";render();});
+
+document.getElementById("top").onclick=()=>window.scrollTo({top:0,behavior:"smooth"});
+
+/* ---------- 匯出 .ics（每年重複） ---------- */
+document.getElementById("ics").onclick=()=>{
+  const pad=n=>String(n).padStart(2,"0");
+  let s=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Birthday Calendar//ZH","CALSCALE:GREGORIAN"];
+  DATA.forEach((p,i)=>{
+    s=s.concat(["BEGIN:VEVENT",
+      `UID:bday-${i}@calendar`,
+      `DTSTAMP:${Y}0101T000000Z`,
+      `DTSTART;VALUE=DATE:${Y}${pad(p.m)}${pad(p.d)}`,
+      `DTEND;VALUE=DATE:${(dt=>Y+pad(dt.getMonth()+1)+pad(dt.getDate()))(new Date(Y,p.m-1,p.d+1))}`,
+      "RRULE:FREQ=YEARLY",
+      `SUMMARY:🎂 ${p.name} 生日`,
+      "TRANSP:TRANSPARENT","END:VEVENT"]);
+  });
+  s.push("END:VCALENDAR");
+  const url=URL.createObjectURL(new Blob([s.join("\r\n")],{type:"text/calendar;charset=utf-8"}));
+  const a=document.createElement("a"); a.href=url; a.download="birthdays.ics"; a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+};
+
+/* ---------- 啟動：捲到本月 ---------- */
+render();
+document.getElementById("foot").textContent = `生日資料共 ${DATA.length} 位 · 每年自動循環`;
+setTimeout(()=>{
+  const t=document.getElementById("m"+(now.getMonth()+1));
+  if(t && !FILTER) window.scrollTo({top:t.offsetTop-110});
+},60);
+</script>
+</body>
+</html>
