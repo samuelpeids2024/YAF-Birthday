@@ -5,34 +5,24 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
 <meta name="theme-color" content="#ffffff">
 <title>YAF生日日曆</title>
-<!-- ====== 社交平台預覽 Meta（WhatsApp / iMessage / Telegram / FB） ====== -->
 
-<!-- 通用 / Facebook Open Graph -->
+<!-- ====== 社交預覽（部署後把 yourname / repo 換成真實網址） ====== -->
 <meta property="og:type" content="website">
 <meta property="og:title" content="🎂 YAF 生日日曆">
-<meta property="og:description" content="YAF 各位弟兄姊妹的年度生日一覽表，手機友善、一鍵匯出行事曆，不再錯過任何一個重要日子！">
-<meta property="og:image" content="https://samuelpeids2024.github.io/YAF-Birthday/sr.jpg">
+<meta property="og:description" content="YAF 夥伴的年度生日一覽，手機友善、即將到來、一鍵匯出行事曆。">
+<meta property="og:url" content="https://yourname.github.io/birthday-calendar/">
+<meta property="og:image" content="https://yourname.github.io/birthday-calendar/preview.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:url" content="https://samuelpeids2024.github.io/YAF-Birthday">
-
-<!-- Twitter Card（兼顧 Twitter / X 預覽） -->
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="🎂 YAF 生日日曆">
-<meta name="twitter:description" content="YAF 各位弟兄姊妹的年度生日一覽表，手機友善、一鍵匯出行事曆！">
-<meta name="twitter:image" content="https://samuelpeids2024.github.io/YAF-Birthday/sr.jpg">
+<meta name="twitter:image" content="https://yourname.github.io/birthday-calendar/preview.jpg">
 
-<!-- WhatsApp 專用（部分版本會讀這組） -->
-<meta property="og:image:alt" content="YAF 生日日曆">
-
-<!-- 舊版 iMessage 兼容 -->
-<meta name="apple-mobile-web-app-title" content="YAF 生日日曆">
-  
 <style>
   :root{
     --bg:#f4f5f7; --card:#fff; --txt:#1c1c1e; --sub:#8a8f99;
     --line:#ececee; --accent:#ff6b81; --accent-soft:#ffeef1;
-    --today:#2f6bff;
+    --today:#2f6bff; --ok:#22b573; --danger:#e5484d;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{margin:0;padding:0}
@@ -40,7 +30,7 @@
     background:var(--bg); color:var(--txt);
     font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
     font-size:15px; line-height:1.45;
-    padding-bottom:calc(28px + env(safe-area-inset-bottom));
+    padding-bottom:calc(90px + env(safe-area-inset-bottom));
   }
   .wrap{max-width:640px;margin:0 auto;padding:0 12px}
 
@@ -53,9 +43,12 @@
     padding-top:calc(8px + env(safe-area-inset-top));
     padding-bottom:8px; border-bottom:1px solid var(--line);
   }
-  .title{display:flex;align-items:baseline;gap:8px;padding:2px 12px 8px}
-  .title h1{font-size:19px;margin:0;letter-spacing:.5px}
-  .title span{font-size:12px;color:var(--sub)}
+  .title{display:flex;align-items:center;gap:8px;padding:2px 12px 8px}
+  .title h1{font-size:19px;margin:0;letter-spacing:.5px;flex:0 0 auto}
+  .title .stat{font-size:12px;color:var(--sub);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .lockbtn{flex:0 0 auto;border:none;background:#e8eaee;color:#4a4f59;border-radius:999px;
+           padding:5px 11px;font-size:13px;line-height:1.2}
+  .lockbtn.on{background:var(--accent);color:#fff;font-weight:600}
   .search{position:relative;padding:0 12px}
   .search input{
     width:100%;border:none;outline:none;background:#e8eaee;
@@ -66,13 +59,16 @@
     width:26px;height:26px;line-height:26px;text-align:center}
   .chips{display:flex;gap:6px;overflow-x:auto;padding:9px 12px 2px;scrollbar-width:none}
   .chips::-webkit-scrollbar{display:none}
-  .chip{
-    flex:0 0 auto;border:none;background:#e8eaee;color:#4a4f59;
-    border-radius:999px;padding:5px 12px;font-size:13px;line-height:1.2;
-  }
+  .chip{flex:0 0 auto;border:none;background:#e8eaee;color:#4a4f59;
+    border-radius:999px;padding:5px 12px;font-size:13px;line-height:1.2}
   .chip.on{background:var(--accent);color:#fff;font-weight:600}
   .chip i{font-style:normal;font-size:10px;opacity:.75;margin-left:3px}
   .hint{padding:6px 12px 0;font-size:11.5px;color:var(--sub)}
+
+  /* ---------- 狀態條 ---------- */
+  .sync{margin:10px 12px 0;display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--sub)}
+  .dot{width:7px;height:7px;border-radius:50%;background:#c7cad0;flex:0 0 auto}
+  .dot.ok{background:var(--ok)} .dot.warn{background:#f2994a} .dot.err{background:var(--danger)}
 
   /* ---------- 即將到來 ---------- */
   .up{background:var(--card);border-radius:16px;margin:12px 0 4px;padding:12px 14px;
@@ -90,7 +86,7 @@
 
   /* ---------- 月份卡 ---------- */
   .month{background:var(--card);border-radius:16px;margin:12px 0;padding:12px 10px 6px;
-         box-shadow:0 1px 2px rgba(0,0,0,.04);scroll-margin-top:118px}
+         box-shadow:0 1px 2px rgba(0,0,0,.04);scroll-margin-top:130px}
   .mhead{display:flex;align-items:center;gap:8px;padding:0 4px 8px}
   .mhead .m{font-size:17px;font-weight:700}
   .mhead .m em{font-style:normal;font-size:11px;color:var(--sub);font-weight:500;margin-left:4px}
@@ -100,50 +96,91 @@
   .wk div{text-align:center;font-size:11px;color:var(--sub);padding:2px 0}
   .wk div:first-child,.wk div:last-child{color:#d0788a}
   .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
-  .cell{
-    position:relative;min-height:44px;border-radius:8px;padding:3px 2px 2px;
-    display:flex;flex-direction:column;gap:1px;background:transparent;
-  }
-  .cell.out{visibility:hidden}
+  .cell{position:relative;min-height:44px;border-radius:8px;padding:3px 2px 2px;
+    display:flex;flex-direction:column;gap:1px;background:transparent;cursor:pointer}
+  .cell.out{visibility:hidden;cursor:default}
   .cell .dn{font-size:11px;color:#5b6069;padding-left:3px;line-height:1.2}
   .cell.we .dn{color:#c76b7d}
   .cell.has{background:var(--accent-soft)}
   .cell.has .dn{color:var(--accent);font-weight:700}
   .cell.today{box-shadow:inset 0 0 0 1.5px var(--today)}
   .cell.today .dn{color:var(--today)}
-  .cell .nm{
-    font-size:8.5px;line-height:1.15;color:#8e2c3c;padding:0 2px;
-    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-  }
-  .cell .nm.dim{color:#9aa0aa}
+  .cell .nm{font-size:8.5px;line-height:1.15;color:#8e2c3c;padding:0 2px;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .mlist{margin-top:8px;border-top:1px dashed var(--line);padding-top:4px}
-  .mlist .li{display:flex;align-items:center;gap:9px;padding:6px 4px}
+  .mlist .li{display:flex;align-items:center;gap:9px;padding:6px 4px;cursor:pointer;border-radius:8px}
   .mlist .li+.li{border-top:1px solid #f4f4f6}
   .mlist .av{width:28px;height:28px;flex-basis:28px;font-size:12px}
   .mlist .d{font-size:12px;color:var(--sub);flex:0 0 auto;min-width:30px;text-align:right}
   .mlist .n{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .mlist .li.hit{background:var(--accent-soft);border-radius:8px}
+  .mlist .li.hit{background:var(--accent-soft)}
+  .mlist .li .pen{font-size:12px;color:#c7cad0;flex:0 0 auto}
   .empty{display:none;text-align:center;color:var(--sub);font-size:13px;padding:30px 0}
-  .tools{display:flex;gap:8px;margin:14px 0 6px}
-  .tools button{flex:1;border:none;background:#e8eaee;color:#3a3f49;border-radius:12px;
+  .tools{display:flex;gap:8px;margin:14px 0 6px;flex-wrap:wrap}
+  .tools button{flex:1 1 45%;border:none;background:#e8eaee;color:#3a3f49;border-radius:12px;
                 padding:10px;font-size:13.5px}
   footer{text-align:center;color:var(--sub);font-size:11.5px;padding:6px 0 18px}
+
+  /* ---------- 懸浮新增 ---------- */
+  .fab{position:fixed;right:16px;bottom:calc(18px + env(safe-area-inset-bottom));z-index:60;
+       width:54px;height:54px;border-radius:50%;border:none;background:var(--accent);color:#fff;
+       font-size:28px;line-height:1;box-shadow:0 6px 18px rgba(255,107,129,.45)}
+
+  /* ---------- 編輯底部彈窗 ---------- */
+  .sheet-bg{position:fixed;inset:0;background:rgba(0,0,0,.35);opacity:0;pointer-events:none;
+            transition:opacity .2s;z-index:90}
+  .sheet-bg.on{opacity:1;pointer-events:auto}
+  .sheet{position:fixed;left:0;right:0;bottom:0;z-index:100;background:#fff;
+    border-radius:20px 20px 0 0;padding:12px 16px calc(22px + env(safe-area-inset-bottom));
+    transform:translateY(110%);transition:transform .26s cubic-bezier(.32,.72,0,1);
+    max-width:640px;margin:0 auto;box-shadow:0 -4px 24px rgba(0,0,0,.16)}
+  .sheet.on{transform:translateY(0)}
+  .sheet .bar{width:40px;height:4px;background:#dcdfe4;border-radius:2px;margin:0 auto 10px}
+  .sheet h3{margin:0 0 10px;font-size:16px}
+  .fld{margin-bottom:12px}
+  .fld label{display:block;font-size:12px;color:var(--sub);margin-bottom:4px}
+  .fld input,.fld select{
+    width:100%;border:1px solid var(--line);background:#fafafb;border-radius:10px;
+    padding:11px 12px;font-size:16px;color:var(--txt);outline:none;font-family:inherit;
+  }
+  .fld input:focus,.fld select:focus{border-color:var(--accent);background:#fff}
+  .fld2{display:flex;gap:10px}
+  .fld2 .fld{flex:1}
+  .sact{display:flex;gap:10px;margin-top:6px}
+  .sact button{flex:1;border:none;border-radius:12px;padding:13px;font-size:15.5px;font-weight:600}
+  .sact .save{background:var(--accent);color:#fff}
+  .sact .del{background:#fdecec;color:var(--danger);flex:0 0 34%;display:none}
+  .sact .del.show{display:block}
+  .sact .cancel{background:#eef0f3;color:#4a4f59;flex:0 0 30%;display:none}
+  .sact .cancel.show{display:block}
+
+  /* ---------- Toast ---------- */
+  .toast{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom));transform:translate(-50%,12px);
+    background:rgba(28,28,30,.92);color:#fff;font-size:13.5px;padding:9px 16px;border-radius:999px;
+    opacity:0;pointer-events:none;transition:.22s;z-index:120;max-width:80vw;text-align:center}
+  .toast.on{opacity:1;transform:translate(-50%,0)}
 </style>
 </head>
 <body>
 
 <header>
-  <div class="title"><h1>🎂 YAF 生日日曆</h1><span id="stat"></span></div>
+  <div class="title">
+    <h1>🎂 YAF 生日日曆</h1>
+    <span class="stat" id="stat"></span>
+    <button class="lockbtn" id="lock">✏️ 編輯中</button>
+  </div>
   <div class="search">
     <span class="ico">🔍</span>
     <input id="q" type="search" placeholder="搜尋名字…" autocomplete="off">
     <span class="clr" id="clr">×</span>
   </div>
   <div class="chips" id="chips"></div>
-  <div class="hint" id="hint">點日期可定位到下方名單 · 月份標籤可快速跳轉</div>
+  <div class="hint" id="hint">點名單可直接編輯 · 點空白日期可新增</div>
 </header>
 
 <div class="wrap">
+  <div class="sync"><span class="dot" id="syncDot"></span><span id="syncTxt">載入中…</span></div>
+
   <section class="up" id="up">
     <h2>🎉 即將到來的生日</h2>
     <div id="upRows"></div>
@@ -155,13 +192,49 @@
   <div class="tools">
     <button id="ics">📅 匯出行事曆 (.ics)</button>
     <button id="top">↑ 回到頂部</button>
+    <button id="seed" style="display:none">☁️ 上傳初始資料</button>
   </div>
   <footer id="foot"></footer>
 </div>
 
-<script>
-/* ---------- 資料 ---------- */
-const DATA = [
+<button class="fab" id="fab">＋</button>
+
+<div class="sheet-bg" id="sheetBg"></div>
+<div class="sheet" id="sheet">
+  <div class="bar"></div>
+  <h3 id="sheetTitle">新增生日</h3>
+  <div class="fld">
+    <label>名字 / 暱稱</label>
+    <input id="fName" placeholder="例如：Abi" autocomplete="off">
+  </div>
+  <div class="fld2">
+    <div class="fld"><label>月</label><select id="fM"></select></div>
+    <div class="fld"><label>日</label><select id="fD"></select></div>
+  </div>
+  <div class="sact">
+    <button class="cancel" id="fCancel">取消</button>
+    <button class="del" id="fDel">刪除</button>
+    <button class="save" id="fSave">儲存</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+/* =========================================================
+   1) Firebase 設定：把下面 4 個值換成你專案的
+   ========================================================= */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyAOdDUSkIjELSQvegjFo-V10Dob3fdH0JY",
+    authDomain: "yafbirthday.firebaseapp.com",
+    projectId: "yafbirthday",
+    storageBucket: "yafbirthday.firebasestorage.app",
+    messagingSenderId: "203618208625",
+    appId: "1:203618208625:web:8f025bc6f4884a65eb04d0"
+};
+
+/* 內建種子資料（首次上傳到雲端用；雲端有資料後以雲端為準） */
+const SEED = [
 ["Abi",2,4],["Shirley 張",2,10],["Lulu",2,24],["Harold",2,26],
 ["Stephen LI",3,11],["Ada",3,12],["Timothy 昊雲",3,20],["Ruby",3,23],["Gordon",3,27],
 ["Jane",4,10],
@@ -175,39 +248,130 @@ const DATA = [
 ["尤牧师",12,16],["Ken",12,16],["Samuel",12,24],["南竹",12,28]
 ].map(x=>({name:x[0].trim(), m:x[1], d:x[2]}));
 
+/* =========================================================
+   2) 常數與工具
+   ========================================================= */
 const MN=["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"];
 const WK=["日","一","二","三","四","五","六"];
 const PALETTE=["#ff6b81","#f2994a","#7c8cff","#2fbf9f","#c475ff","#4aa8ff","#ff8f5a","#39b6a8","#e068a8","#8b93ff"];
 const color = s => PALETTE[[...s].reduce((a,c)=>a+c.charCodeAt(0),0)%PALETTE.length];
 const initial = s => (s.match(/[A-Za-z一-龥]/)||[s[0]])[0].toUpperCase();
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
 const now=new Date(), Y=now.getFullYear(), TODAY=new Date(Y,now.getMonth(),now.getDate());
 const dayCount = m => new Date(Y,m,0).getDate();
 
-/* ---------- 即將到來 ---------- */
-function upcoming(list){
+let DATA = SEED.map(p=>({...p,id:"seed-"+Math.random().toString(36).slice(2,8)}));
+let FILTER = "";
+let EDIT = true;                       // 是否可編輯
+let CLOUD = false, db=null, COL=null;  // Firebase 狀態
+
+/* Toast */
+let toastTimer;
+function toast(msg){
+  const t=$("toast"); t.textContent=msg; t.classList.add("on");
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove("on"),1800);
+}
+function setSync(state,txt){
+  $("syncDot").className = "dot " + (state||"");
+  $("syncTxt").textContent = txt;
+}
+
+/* =========================================================
+   3) 初始化 Firebase（失敗或尚未設定 → 自動退回本地模式）
+   ========================================================= */
+let fb = null;
+async function initCloud(){
+  if(String(FIREBASE_CONFIG.apiKey).startsWith("YOUR_")) return false;
+  try{
+    const [appMod, fsMod, authMod] = await Promise.all([
+      import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"),
+      import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"),
+      import("https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js")
+    ]);
+    const app = appMod.initializeApp(FIREBASE_CONFIG);
+    db  = fsMod.getFirestore(app);
+    COL = fsMod.collection(db,"birthdays");
+    fb  = {fs:fsMod, authMod};
+    const auth = authMod.getAuth(app);
+    if(!auth.currentUser) await authMod.signInAnonymously(auth);
+    return true;
+  }catch(err){
+    console.warn("Firebase 初始化失敗，改用本地模式：", err);
+    return false;
+  }
+}
+
+/* ---- 雲端即時訂閱 ---- */
+function subscribe(){
+  const {fs} = fb;
+  fs.onSnapshot(COL, snap=>{
+    DATA = snap.docs.map(d=>{
+      const x=d.data();
+      return {id:d.id, name:(x.name||"").trim(), m:+x.m||1, d:+x.d||1};
+    }).filter(p=>p.name);
+    render();
+    $("seed").style.display = DATA.length ? "none" : "flex";
+    setSync("ok", `☁️ 已同步 ${DATA.length} 位 · 即時更新`);
+  }, err=>{
+    console.error(err);
+    setSync("err","☁️ 讀取失敗，請檢查 Firestore 規則");
+  });
+}
+
+/* ---- 本地模式 ---- */
+function loadLocal(){
+  try{
+    const s=localStorage.getItem("yaf_bdays");
+    if(s){ const a=JSON.parse(s); if(Array.isArray(a)&&a.length)
+      DATA=a.map(p=>({id:p.id||("L"+Math.random().toString(36).slice(2,8)),name:p.name,m:+p.m,d:+p.d})); }
+  }catch(e){}
+  if(!DATA || !DATA.length) DATA = SEED.map(p=>({...p,id:"seed-"+Math.random().toString(36).slice(2,8)}));
+}
+function saveLocal(){
+  try{ localStorage.setItem("yaf_bdays", JSON.stringify(DATA.map(p=>({id:p.id,name:p.name,m:p.m,d:p.d})))); }catch(e){}
+}
+
+/* =========================================================
+   4) 增刪改（雲端 / 本地 自動分流）
+   ========================================================= */
+async function opAdd(rec){
+  if(CLOUD){ await fb.fs.addDoc(COL,{...rec, updatedAt: fb.fs.serverTimestamp()}); return; }
+  DATA.push({...rec, id:"L"+Date.now().toString(36)+Math.random().toString(36).slice(2,5)});
+  saveLocal(); render();
+}
+async function opUpdate(id, rec){
+  if(CLOUD){ await fb.fs.updateDoc(fb.fs.doc(db,"birthdays",id),{...rec, updatedAt: fb.fs.serverTimestamp()}); return; }
+  const i=DATA.findIndex(x=>x.id===id); if(i<0) return;
+  DATA[i]={...DATA[i], ...rec}; saveLocal(); render();
+}
+async function opDelete(id){
+  if(CLOUD){ await fb.fs.deleteDoc(fb.fs.doc(db,"birthdays",id)); return; }
+  DATA=DATA.filter(x=>x.id!==id); saveLocal(); render();
+}
+
+/* =========================================================
+   5) 渲染
+   ========================================================= */
+function match(p){ return !FILTER || p.name.toLowerCase().includes(FILTER); }
+
+function renderUp(list){
   const arr=list.map(p=>{
     let dt=new Date(Y,p.m-1,p.d);
     if(dt<TODAY) dt=new Date(Y+1,p.m-1,p.d);
-    return {...p, dt, days:Math.round((dt-TODAY)/864e5)};
-  }).sort((a,b)=>a.days-b.days);
-  return arr.slice(0,5);
-}
-function renderUp(list){
-  const rows=upcoming(list).map(p=>{
+    return {...p, days:Math.round((dt-TODAY)/864e5)};
+  }).sort((a,b)=>a.days-b.days).slice(0,5);
+
+  $("upRows").innerHTML = arr.map(p=>{
     const t = p.days===0 ? "就是今天 🎈" : p.days===1 ? "明天" : p.days+" 天後";
     return `<div class="row">
-      <div class="av" style="background:${color(p.name)}">${initial(p.name)}</div>
-      <div class="who"><b>${p.name}</b><small>${p.m}月${p.d}日 ${WK[new Date(Y,p.m-1,p.d).getDay()]}</small></div>
+      <div class="av" style="background:${color(p.name)}">${esc(initial(p.name))}</div>
+      <div class="who"><b>${esc(p.name)}</b><small>${p.m}月${p.d}日 ${WK[new Date(Y,p.m-1,p.d).getDay()]}</small></div>
       <div class="cd ${p.days===0?'today':''}">${t}</div>
     </div>`;
-  }).join("");
-  document.getElementById("upRows").innerHTML = rows || `<div class="row"><div class="who"><small>沒有符合的壽星</small></div></div>`;
+  }).join("") || `<div class="row"><div class="who"><small>沒有符合的壽星</small></div></div>`;
 }
-
-/* ---------- 日曆 ---------- */
-let FILTER = "";
-function match(p){ return !FILTER || p.name.toLowerCase().includes(FILTER); }
 
 function render(){
   const list = DATA.filter(match);
@@ -215,26 +379,28 @@ function render(){
   list.forEach(p=>byMonth[p.m-1].push(p));
   byMonth.forEach(a=>a.sort((x,y)=>x.d-y.d));
 
-  document.getElementById("stat").textContent = FILTER ? `找到 ${list.length} 位` : `共 ${DATA.length} 位壽星`;
-  document.getElementById("empty").style.display = list.length? "none":"block";
+  $("stat").textContent = FILTER ? `找到 ${list.length} 位` : `共 ${DATA.length} 位壽星`;
+  $("empty").style.display = list.length ? "none" : "block";
   renderUp(list);
 
-  document.getElementById("cal").innerHTML = MN.map((label,mi)=>{
+  $("cal").innerHTML = MN.map((label,mi)=>{
     if(!byMonth[mi].length) return "";
     const m=mi+1, first=new Date(Y,mi,1).getDay(), total=dayCount(m);
     let cells="";
     for(let i=0;i<first;i++) cells+=`<div class="cell out"></div>`;
     for(let d=1;d<=total;d++){
       const born=byMonth[mi].filter(p=>p.d===d);
-      const we = (new Date(Y,mi,d).getDay()===0||new Date(Y,mi,d).getDay()===6);
-      const isToday = (m===now.getMonth()+1 && d===now.getDate());
+      const w=new Date(Y,mi,d).getDay();
+      const we=(w===0||w===6);
+      const isToday=(m===now.getMonth()+1 && d===now.getDate());
       const cls=["cell", born.length?"has":"", we?"we":"", isToday?"today":""].join(" ");
-      const names = born.map(p=>`<div class="nm">${p.name}</div>`).join("");
+      const names=born.map(p=>`<div class="nm">${esc(p.name)}</div>`).join("");
       cells+=`<div class="${cls}" data-m="${m}" data-d="${d}"><span class="dn">${d}</span>${names}</div>`;
     }
-    const li = byMonth[mi].map(p=>`<div class="li" data-m="${p.m}" data-d="${p.d}">
-        <div class="av" style="background:${color(p.name)}">${initial(p.name)}</div>
-        <div class="n">${p.name}</div><div class="d">${p.d}日</div></div>`).join("");
+    const li=byMonth[mi].map(p=>`<div class="li" data-id="${esc(p.id)}">
+        <div class="av" style="background:${color(p.name)}">${esc(initial(p.name))}</div>
+        <div class="n">${esc(p.name)}</div><div class="d">${p.d}日</div>
+        ${EDIT?'<span class="pen">✏️</span>':''}</div>`).join("");
     return `<section class="month" id="m${m}">
       <div class="mhead"><span class="m">${label}<em>${m} 月</em></span><span class="c">${byMonth[mi].length} 位</span></div>
       <div class="wk">${WK.map(w=>`<div>${w}</div>`).join("")}</div>
@@ -243,71 +409,179 @@ function render(){
     </section>`;
   }).join("");
 
-  // 月份快捷標籤
-  document.getElementById("chips").innerHTML = MN.map((label,mi)=>{
+  $("chips").innerHTML = MN.map((label,mi)=>{
     const n=byMonth[mi].length;
     return `<button class="chip" data-m="${mi+1}">${label}${n?`<i>${n}</i>`:""}</button>`;
   }).join("");
 }
 
-/* ---------- 互動 ---------- */
+/* =========================================================
+   6) 編輯彈窗
+   ========================================================= */
+let editingId = null;
+function fillSelects(){
+  $("fM").innerHTML = MN.map((t,i)=>`<option value="${i+1}">${t}</option>`).join("");
+  $("fD").innerHTML = Array.from({length:31},(_,i)=>`<option value="${i+1}">${i+1}日</option>`).join("");
+}
+function openSheet(rec){
+  fillSelects();
+  editingId = rec && rec.id ? rec.id : null;
+  $("sheetTitle").textContent = editingId ? "編輯生日" : "新增生日";
+  $("fName").value = rec ? rec.name : "";
+  $("fM").value = rec ? rec.m : (now.getMonth()+1);
+  $("fD").value = rec ? rec.d : now.getDate();
+  $("fDel").classList.toggle("show", !!editingId);
+  $("fCancel").classList.toggle("show", !!editingId);
+  $("sheetBg").classList.add("on"); $("sheet").classList.add("on");
+  if(!editingId) setTimeout(()=>$("fName").focus(),260);
+}
+function closeSheet(){
+  $("sheetBg").classList.remove("on"); $("sheet").classList.remove("on");
+  editingId=null;
+}
+$("sheetBg").onclick = closeSheet;
+$("fCancel").onclick = closeSheet;
+
+$("fSave").onclick = async ()=>{
+  const name = $("fName").value.trim();
+  const m = +$("fM").value, d = +$("fD").value;
+  if(!name){ toast("請填寫名字"); $("fName").focus(); return; }
+  if(d > dayCount(m)){ toast(`${m}月沒有 ${d} 日`); return; }
+  try{
+    if(editingId){ await opUpdate(editingId,{name,m,d}); toast("已更新 ✨"); }
+    else { await opAdd({name,m,d}); toast("已新增 🎉"); }
+    closeSheet();
+  }catch(e){ console.error(e); toast("儲存失敗：" + (e.message||e)); }
+};
+$("fDel").onclick = async ()=>{
+  if(!editingId) return;
+  const p = DATA.find(x=>x.id===editingId);
+  if(!confirm(`確定刪除「${p?p.name:""}」的生日？`)) return;
+  try{ await opDelete(editingId); toast("已刪除"); closeSheet(); }
+  catch(e){ console.error(e); toast("刪除失敗"); }
+};
+
+/* =========================================================
+   7) 互動
+   ========================================================= */
 document.addEventListener("click", e=>{
   const chip=e.target.closest(".chip");
   if(chip){
-    const t=document.getElementById("m"+chip.dataset.m);
-    if(t) window.scrollTo({top:t.offsetTop-110, behavior:"smooth"});
+    const t=$("m"+chip.dataset.m);
+    if(t) window.scrollTo({top:t.offsetTop-130, behavior:"smooth"});
     return;
   }
-  const cell=e.target.closest(".grid .cell");
-  if(cell){
-    const li=document.querySelector(`.mlist .li[data-m="${cell.dataset.m}"][data-d="${cell.dataset.d}"]`);
-    if(li){
-      document.querySelectorAll(".mlist .li.hit").forEach(x=>x.classList.remove("hit"));
-      li.classList.add("hit");
-      li.scrollIntoView({block:"center", behavior:"smooth"});
-      li.animate([{background:"#ffd9e0"},{background:"#ffeef1"}],{duration:900});
-    }
+  const li=e.target.closest(".mlist .li");
+  if(li){
+    if(!EDIT){ toast("目前是唯讀模式，點右上「✏️ 編輯中」切換"); return; }
+    const p=DATA.find(x=>x.id===li.dataset.id);
+    if(p) openSheet(p);
     return;
+  }
+  const cell=e.target.closest(".grid .cell:not(.out)");
+  if(cell){
+    const m=+cell.dataset.m, d=+cell.dataset.d;
+    const born=DATA.filter(p=>p.m===m && p.d===d);
+    if(born.length===1 && EDIT){ openSheet(born[0]); return; }
+    const target=document.querySelector(`.mlist .li[data-id="${born.length?born[0].id:null}"]`);
+    if(born.length && target){
+      document.querySelectorAll(".mlist .li.hit").forEach(x=>x.classList.remove("hit"));
+      target.classList.add("hit");
+      target.scrollIntoView({block:"center",behavior:"smooth"});
+      target.animate([{background:"#ffd9e0"},{background:"#ffeef1"}],{duration:900});
+    }else if(!born.length){
+      if(!EDIT){ toast("目前是唯讀模式"); return; }
+      openSheet({name:"",m,d});
+    }
   }
 });
 
-const q=document.getElementById("q"), clr=document.getElementById("clr");
+$("fab").onclick = ()=>{
+  if(!EDIT){ toast("目前是唯讀模式，點右上「✏️ 編輯中」切換"); return; }
+  openSheet(null);
+};
+
+/* 編輯開關 */
+const lockBtn=$("lock");
+try{ if(localStorage.getItem("yaf_edit")==="0") EDIT=false; }catch(e){}
+function syncLockBtn(){
+  lockBtn.textContent = EDIT ? "✏️ 編輯中" : "🔒 唯讀";
+  lockBtn.classList.toggle("on", EDIT);
+  $("hint").textContent = EDIT ? "點名單可直接編輯 · 點空白日期可新增" : "唯讀模式：點右上按鈕可開啟編輯";
+}
+lockBtn.onclick = ()=>{
+  EDIT=!EDIT; try{ localStorage.setItem("yaf_edit", EDIT?"1":"0"); }catch(e){}
+  syncLockBtn(); render();
+};
+syncLockBtn();
+
+/* 搜尋 */
+const q=$("q"), clr=$("clr");
 q.addEventListener("input",()=>{
   FILTER=q.value.trim().toLowerCase();
   clr.style.display=FILTER?"block":"none";
   render();
 });
 clr.addEventListener("click",()=>{q.value="";FILTER="";clr.style.display="none";render();});
+$("top").onclick=()=>window.scrollTo({top:0,behavior:"smooth"});
 
-document.getElementById("top").onclick=()=>window.scrollTo({top:0,behavior:"smooth"});
-
-/* ---------- 匯出 .ics（每年重複） ---------- */
-document.getElementById("ics").onclick=()=>{
+/* 匯出 .ics */
+$("ics").onclick=()=>{
   const pad=n=>String(n).padStart(2,"0");
-  let s=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Birthday Calendar//ZH","CALSCALE:GREGORIAN"];
+  let s=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//YAF Birthday//ZH","CALSCALE:GREGORIAN"];
   DATA.forEach((p,i)=>{
+    const nx=new Date(Y,p.m-1,p.d+1);
     s=s.concat(["BEGIN:VEVENT",
-      `UID:bday-${i}@calendar`,
+      `UID:yaf-bday-${i}@calendar`,
       `DTSTAMP:${Y}0101T000000Z`,
       `DTSTART;VALUE=DATE:${Y}${pad(p.m)}${pad(p.d)}`,
-      `DTEND;VALUE=DATE:${(dt=>Y+pad(dt.getMonth()+1)+pad(dt.getDate()))(new Date(Y,p.m-1,p.d+1))}`,
+      `DTEND;VALUE=DATE:${Y}${pad(nx.getMonth()+1)}${pad(nx.getDate())}`,
       "RRULE:FREQ=YEARLY",
       `SUMMARY:🎂 ${p.name} 生日`,
       "TRANSP:TRANSPARENT","END:VEVENT"]);
   });
   s.push("END:VCALENDAR");
   const url=URL.createObjectURL(new Blob([s.join("\r\n")],{type:"text/calendar;charset=utf-8"}));
-  const a=document.createElement("a"); a.href=url; a.download="birthdays.ics"; a.click();
+  const a=document.createElement("a"); a.href=url; a.download="YAF-birthdays.ics"; a.click();
   setTimeout(()=>URL.revokeObjectURL(url),1000);
 };
 
-/* ---------- 啟動：捲到本月 ---------- */
-render();
-document.getElementById("foot").textContent = `生日資料共 ${DATA.length} 位 · 每年自動循環`;
-setTimeout(()=>{
-  const t=document.getElementById("m"+(now.getMonth()+1));
-  if(t && !FILTER) window.scrollTo({top:t.offsetTop-110});
-},60);
+/* 上傳初始資料（僅雲端模式、且雲端為空時顯示） */
+$("seed").onclick = async ()=>{
+  if(!CLOUD){ toast("目前是本地模式"); return; }
+  if(!confirm(`確定把內建 ${SEED.length} 筆資料上傳到雲端？`)) return;
+  try{
+    for(const p of SEED) await fb.fs.addDoc(COL,{name:p.name,m:p.m,d:p.d,updatedAt:fb.fs.serverTimestamp()});
+    toast("已上傳 ☁️");
+  }catch(e){ console.error(e); toast("上傳失敗，請檢查規則"); }
+};
+
+/* =========================================================
+   8) 啟動
+   ========================================================= */
+(async function start(){
+  setSync("","載入中…");
+  CLOUD = await initCloud();
+  if(CLOUD){
+    subscribe();                 // 渲染由 onSnapshot 觸發
+    setTimeout(()=>{ if(!DATA.length) render(); }, 1200);
+  }else{
+    loadLocal();
+    render();
+    setSync("warn","📱 本地模式：資料只存在這台手機（填入 Firebase 設定即啟用雲端）");
+    $("seed").style.display="none";
+  }
+  $("foot").textContent = CLOUD
+    ? `共 ${DATA.length} 位 · 雲端即時同步 · 每年自動循環`
+    : `生日資料共 ${DATA.length} 位 · 本地模式`;
+
+  // 自動捲到本月
+  setTimeout(()=>{
+    if(FILTER) return;
+    const t=$("m"+(now.getMonth()+1));
+    if(t) window.scrollTo({top:t.offsetTop-130});
+  },260);
+})();
 </script>
 </body>
 </html>
