@@ -381,6 +381,11 @@ function render(){
 
   $("stat").textContent = FILTER ? `找到 ${list.length} 位` : `共 ${DATA.length} 位壽星`;
   $("empty").style.display = list.length ? "none" : "block";
+
+  $("foot").textContent = CLOUD
+    ? `共 ${DATA.length} 位 · 雲端即時同步 · 每年自動循環`
+    : `生日資料共 ${DATA.length} 位 · 本地模式`;
+  
   renderUp(list);
 
   $("cal").innerHTML = MN.map((label,mi)=>{
