@@ -286,9 +286,9 @@ async function initCloud(){
   if(String(FIREBASE_CONFIG.apiKey).startsWith("YOUR_")) return false;
   try{
     const [appMod, fsMod, authMod] = await Promise.all([
-      import("https://www.gstatic.com/firebasejs/12.8.0/firebase-app-compat.js"),
-      import("https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore-compat.js"),
-      import("https://www.gstatic.com/firebasejs/12.8.0/firebase-auth-compat.js")
+      import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"),
+      import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"),
+      import("https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js")
     ]);
     const app = appMod.initializeApp(FIREBASE_CONFIG);
     db  = fsMod.getFirestore(app);
